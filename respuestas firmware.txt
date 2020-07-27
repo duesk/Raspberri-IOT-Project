@@ -1,0 +1,26 @@
+ok T:28 /0 @:0
+ok T:100 /100 @:20
+
+
+
+
+ERROR:root:Error:Heating failed, system stopped! Heater_ID: 0
+
+ERROR:root:Error:Printer halted. kill() called!
+
+
+
+erro :Error:Heating failed, system stopped! Heater_ID: 0
+
+erro :Error:Printer halted. kill() called!
+
+
+
+
+bed
+, system stopped! Heater_ID: 
+Heater switched off. Temperature difference between temp sensors is too high !
+Heating failed
+Thermal Runaway
+MAXTEMP triggered
+MINTEMP triggered
