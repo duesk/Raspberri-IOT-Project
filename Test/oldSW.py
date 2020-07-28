@@ -16,40 +16,64 @@ from PIL import ImageTk
 import threading
 import time
 
-from status import Status as Status
-from secuencias import Secuencias as Secuencias 
 
-
-status = Status()
-secuencia = Secuencias()
-
-############################################################
-###### Verificar que sistema operativo esta corriendo ######
-############################################################
+sys_mac     =   False
+sys_win     =   False
+sys_linux   =   False
 if sys.platform.startswith('darwin'):
     from tkmacosx import Button
-    status.is_MAC = True
+    sys_mac = True
+
 if sys.platform.startswith('win'):
-    status.is_WIN = True
+    sys_win = True
+
 if sys.platform.startswith('linux') or sys.platform.startswith('cygwin'):
-    status.is_LNX = True
-#print("sistema LNX:" + str(status.is_LNX))
-#print("sistema WIN:" + str(status.is_WIN))
-#print("sistema MAC:" + str(status.is_MAC))
+    sys_linux = True
+
+print("sistema LNX:" + str(sys_linux))
+
+print("sistema WIN:" + str(sys_win))
+
+print("sistema MAC:" + str(sys_mac))
+
+ruta = ""
+gcode = []
+temp_global = ""
+temp_state = ""
+temp_set = 180
+is_printing = False
+is_pause = False
+response = False
+st_print = False
+
+
+len_gcode = 0.0
+index_actual = 0.0
 
 def select_file(archivo_selected):
+    global sys_linux
+    global sys_mac
+    global sys_win
+    global ruta 
+    global gcode 
+    ruta = Filedialog.askopenfilename(initialdir = "~/Escritorio", title = "Abrir archivo" , filetypes = (("Gcode", "*.gcode"),)  )
 
-    status.ruta = Filedialog.askopenfilename(initialdir = "~/Escritorio", title = "Abrir archivo" , filetypes = (("Gcode", "*.gcode"),) )
-    status.process_name()
+    if ruta != "":
+        archivo = ""
+        for i in range(len(ruta),0,-1):
+            if ruta[i-1] != "/":
+                index = i-1
+            else:
+                archivo = ruta[index:len(ruta)]
+                break
+        print("archivo seleccioado: " + archivo)
 
-    if status.ruta != "":
-    
-        archivo_selected.set("Seleccionado: "+ status.archivo)
+        archivo_selected.set("Seleccionado: "+archivo)
         lb_Select_file.pack()
-        if status.is_MAC:
+        if sys_mac:
             btn_start_print["state"] = NORMAL
             btn_calibrate["state"] = NORMAL
-        if status.is_WIN or status.is_LNX:
+        if sys_win or sys_linux:
             btn_start_print["state"] = ACTIVE
             btn_calibrate["state"] = ACTIVE
 
@@ -58,49 +82,63 @@ def select_file(archivo_selected):
         lb_Select_file.pack()
         btn_start_print["state"] = DISABLED
         btn_cancel["state"] = DISABLED
-        if status.is_MAC:
+        if sys_mac:
             btn_calibrate["state"] = NORMAL
-        if status.is_WIN or status.is_LNX:
+        if sys_win or sys_linux:
             btn_calibrate["state"] = ACTIVE
 
 
 
 def start_print():
-    if status.is_printing:
-        if status.is_pause:
+    global ruta 
+    global gcode
+    global is_printing 
+    global is_pause
+    global temp_state
+    global temp_set
+    global st_print
+
+    if is_printing:
+        if is_pause:
             is_pause = False 
             printer.resume()
             btn_start_print["text"] = "Pausar"
         else:
             is_pause = True
             printer.pause()
-            printer.send_now(secuencia.pause_position)
+            printer.send_now("G1 X0.0 Y0.0 Z100.0 F6000")
             btn_start_print["text"] = "Reanudar"
 
     else:
-        if status.ruta != "":
-            archivo = open(status.ruta, "r")
-            status.gcode = archivo.readlines()
+        if ruta != "":
+            archivo = open(ruta, "r")
+            gcode = archivo.readlines()
             archivo.close()
             #print(gcode)
             printer.send("G28")
-            status.gcode = [i.strip() for i in open(status.ruta)]
-            status.gcode = LightGCode(status.gcode)
-            status.st_print = True
+            gcode = [i.strip() for i in open(ruta)]
+            gcode = LightGCode(gcode)
+            st_print = True
             btn_calibrate["state"] = DISABLED
             bt_select_file["state"]=DISABLED
 
 
+
+        
+
 def cancel_window():
+    global sys_linux
+    global sys_mac
+    global sys_win
 
     win = Toplevel()
     win.title('Peligro')
-    if status.is_MAC or status.is_WIN:
+    if sys_mac or sys_win:
         win.iconbitmap("icon.ico")
     message = "¿Seguro que deseas cancelar la impresion?"
     Label(win, text=message).pack()
     frame = Frame(win)
-    if status.is_MAC:
+    if sys_mac:
         Button(frame, text="Si", command= lambda : cancel_print(win), font = (font ,content_size_font),bg = color_button, fg = color_text_button).pack(side = "left")
         
         Label(frame_4, text = "   ", font = (font ,content_size_font), bg = color_theme).pack(side = "left",pady = 15)
@@ -117,20 +155,25 @@ def cancel_window():
     frame.pack()
 
 def cancel_print(win):
-
-    status.is_pause
-    status.response
+    global sys_linux
+    global sys_mac
+    global sys_win
+    global is_printing
+    global is_pause
+    global response
+    #global st_print
+    #st_print = False
     win.destroy()
-    status.is_printing = False
+    is_printing = False
     printer.queueindex = 0
     printer.cancelprint()
-    printer.send_now(secuencia.cancel_position)
+    printer.send_now("G1 X0.0 Y0.0 Z100.0 F4500")
     is_pause = False
     btn_start_print["text"] = "Imprimir"
     btn_cancel["state"] = DISABLED
-    if status.is_MAC:
+    if sys_mac:
         bt_select_file["state"]=NORMAL
-    if status.is_WIN or status.is_LNX:
+    if sys_win or sys_linux:
         bt_select_file["state"]=ACTIVE
         btn_calibrate["state"] = ACTIVE
     status_label.set("Status: Impresion cancelada.")
@@ -139,25 +182,32 @@ def cancel_print(win):
 
 
 def thread_set(printer,temp_label_extruder):
-    status.temp_state
-    status.is_pause
-    #status.is_printing = False
-    status.is_pause = False
+    global sys_linux
+    global sys_mac
+    global sys_win
+    global temp_state
+    global temp_set
+    global is_pause
+    global st_print
+    global is_printing
+
+    #is_printing = False
+    is_pause = False
     temp_saved = 0
     kill = False
     fase = True
     #printing = False
 
     while True:
-        #print("temp set: " + str(status.temp_set))
+        #print("temp set: " + str(temp_set))
         #print("temp saved: " + str(temp_saved))
-        if (status.temp_set != temp_saved):
-            temp_saved = status.temp_set
-            printer.send_now("M104 S%d" %status.temp_set)
+        if (temp_set != temp_saved):
+            temp_saved = temp_set
+            printer.send_now("M104 S%d" %temp_set)
             print("Temperatura enviada")
         printer.send_now("M105")
         time.sleep(3)
-        temp_label_extruder.set("Actual:     %s°C     de     " %status.temp_state)
+        temp_label_extruder.set("Actual:     %s°C     de     " %temp_state)
         lb_temp.pack()
         error = printer.errorcb
         list_error =list(error)
@@ -172,17 +222,17 @@ def thread_set(printer,temp_label_extruder):
             break
         #format_error(error)
         #print(error)
-        if status.st_print:
-            min_temp = status.temp_set -5
-            if float(status.temp_state) >= min_temp:
-                status.st_print = False  
+        if st_print:
+            min_temp = temp_set -5
+            if float(temp_state) >= min_temp:
+                st_print = False  
                 printer.send_now("G28")
-                printer.startprint(status.gcode)
+                printer.startprint(gcode)
                 printer.send_now("G90")
-                #status.is_printing = True
-                if  status.is_LNX or status.is_MAC:
+                #is_printing = True
+                if  sys_linux or sys_win:
                     btn_cancel["state"] = ACTIVE
-                if status.is_MAC:
+                if sys_mac:
                     btn_cancel["state"]=NORMAL
                 bt_select_file["state"]=DISABLED
                 btn_start_print["text"] = "pausa"
@@ -200,10 +250,10 @@ def thread_set(printer,temp_label_extruder):
         b = printer.queueindex
         print("index:"+str(b))
         if b >= 1:
-            status.is_printing = True
-        if status.is_printing:
-            if status.is_pause:
-                printer.send_now(secuencia.pause_position)
+            is_printing = True
+        if is_printing:
+            if is_pause:
+                printer.send_now("G1 X0.0 Y0.0 Z100.0 F4500")
                 print("printer pausada enviando gcode de posicion de pausa")
             try:
                 a = len(printer.mainqueue)
@@ -218,19 +268,19 @@ def thread_set(printer,temp_label_extruder):
                 print("except : Progress bar")
             if b == 0:
                 #printing=False
-                status.is_printing = False
+                is_printing = False
                 print("ya entre")
                 status_label.set("Status: Impresion terminada")
                 printer.send_now("G28")
-                status.is_printing = False
+                is_printing = False
                 progressbar["value"] = 99.9
                 progressbar.pack()
                 btn_start_print["text"] = "Imprimir"
                 btn_cancel["state"] = DISABLED
-                if status.is_LNX or status.is_WIN:
+                if sys_linux or sys_win:
                     btn_calibrate["state"] = ACTIVE
                     bt_select_file["state"]=ACTIVE
-                if status.is_MAC:
+                if sys_mac:
                     btn_calibrate["state"] = NORMAL
                     bt_select_file["state"]=NORMAL
         #else:
@@ -238,34 +288,36 @@ def thread_set(printer,temp_label_extruder):
         print("Status : thread is working")
 
 def temp_callback(a):
-    status.temp_state 
-    status.temp_state = ""
+    global temp_state 
+    temp_state = ""
     print('temp_callback', a)
     temp_state = a[5:8]
     #print("Parse:" + temp_state)
 
-def high_temp():
-    status.temp_set +=1
-    status.temp_set_var.set(str(status.temp_set))
+def high_temp(temp_set_var):
+    global temp_set
+    temp_set +=1
+    temp_set_var.set(str(temp_set))
     lb_set_temp.pack()
 
-def low_temp():
-    status.temp_set -=1
-    status.temp_set_var.set(str(status.temp_set))
+def low_temp(temp_set_var):
+    global temp_set
+    temp_set -=1
+    temp_set_var.set(str(temp_set))
     lb_set_temp.pack()
     
 
 def position_1():
     printer.send_now("G28")
-    printer.send_now(secuencia.cal_1_position)
+    printer.send_now("G1 X45.0 Y-30.0 Z0.150 F3500")
 
 def position_2():
     printer.send_now("G28")
-    printer.send_now(secuencia.cal_2_position)
+    printer.send_now("G1 X0.0 Y45.0 Z0.150 F3500")
 
 def position_3():
     printer.send_now("G28")
-    printer.send_now(secuencia.cal_3_position)
+    printer.send_now("G1 X-45.0 Y-30.0 Z0.150 F3500")
 
 def cerrar(root,win):
     root.deiconify()
@@ -274,8 +326,12 @@ def cerrar(root,win):
 
 
 def calibrate(root):
+    global sys_linux
+    global sys_mac
+    global sys_win
+
     win = Toplevel()
-    if status.is_MAC or status.is_LNX:
+    if sys_mac or sys_win:
         win.iconbitmap("icon.ico")
     #win.attributes("-type","notification")   #eliminar marco de sistema para cerrar
     #win.overrideredirect(True)
@@ -285,7 +341,7 @@ def calibrate(root):
     Label(win, text=message).pack()
     frame = Frame(win,pady = 50, padx = 50)
 
-    if status.is_MAC:
+    if sys_mac:
         Button(frame, text="posición 1", command=position_1, font = (font ,content_size_font),bg = color_button, fg = color_text_button).grid(row = 1, column = 0)
         Button(frame, text="posición 2", command=position_2, font = (font ,content_size_font),bg = color_button, fg = color_text_button).grid(row = 1, column = 2)
         Button(frame, text="posición 3", command=position_3, font = (font ,content_size_font),bg = color_button, fg = color_text_button).grid(row = 0, column = 1)
@@ -313,25 +369,31 @@ def close_all(root):
     pass
 
 def cancel_and_quit(win,root):
-
-    status.is_pause
-    status.response
+    global is_printing
+    global is_pause
+    global response
     win.destroy()
     printer.cancelprint()
     root.destroy()
 
 def close_window(root):
+    global sys_linux
+    global sys_mac
+    global sys_win
+    global is_printing
+    global st_print
+    global sys_mac
 
-    if status.is_printing or status.st_print:
+    if is_printing or st_print:
         win = Toplevel()
-        if status.is_MAC or status.is_WIN:
+        if sys_mac or sys_win:
             win.iconbitmap("icon.ico")
         win.title('Peligro')
         message = "¿Seguro que deseas cancelar la impresion y cerrar la ventana?"
         Label(win, text=message).pack()
         frame = Frame(win)
 
-        if status.is_MAC:
+        if sys_mac:
             Button(frame, text="Si", command= lambda : cancel_and_quit(win,root), font = (font ,content_size_font),bg = color_button, fg = color_text_button).pack(side = "left")
             
             Label(frame_4, text = "   ", font = (font ,content_size_font), bg = color_theme).pack(side = "left",pady = 15)
@@ -364,7 +426,7 @@ if __name__ == "__main__":
 
 
     while True:
-        if status.is_MAC:
+        if sys_mac:
                     #variables de estilo
             title_size_font = 16
             content_size_font = 12
@@ -405,11 +467,11 @@ if __name__ == "__main__":
             if is_conect == False:
                 init_window = Tk()
                 init_window.title("Error de conexión ")
-                if status.is_MAC or status.is_WIN:
+                if sys_mac or sys_win:
                     init_window.iconbitmap("icon.ico")
                 init_window.config(bg = color_theme)
                 Label(init_window, text= "Error el programa no pudo conectarse ",font = (font ,content_size_font), bg = color_theme).pack(side = "left", anchor = "nw", pady = 30,padx = 30)
-                if status.is_MAC:
+                if sys_mac:
                     Button(init_window, text = "Reiniciar" , font = (font ,content_size_font),bg = color_button, fg = color_text_button, command = init_window.destroy).pack(side = "left")
                 else:
                     Button(init_window, text = "Reiniciar" , activebackground = color_bg_activate_button, activeforeground = color_font_activate_button, font = (font ,content_size_font),bg = color_button, fg = color_text_button, command = init_window.destroy).pack(side = "left")
@@ -423,7 +485,7 @@ if __name__ == "__main__":
         ##################            interfaz             ######################
         #########################################################################
         root = Tk()
-        if status.is_MAC or status.is_WIN:
+        if sys_mac or sys_win:
             root.iconbitmap("icon.ico")
         root.title( "Colibri 3D")
         root.minsize(500,310)
@@ -444,8 +506,8 @@ if __name__ == "__main__":
         temp_label_extruder = StringVar()
         temp_label_extruder.set("Actual:     --°C     de     ")
 
-        status.temp_set_var = StringVar()
-        status.temp_set_var.set(str(status.temp_set))
+        temp_set_var = StringVar()
+        temp_set_var.set(str(temp_set))
 
         archivo_selected = StringVar()
         archivo_selected.set("Ningun archivo seleccionado")
@@ -491,23 +553,23 @@ if __name__ == "__main__":
 
         #Label(frame_2, text = "   /   ", font = (font ,content_size_font), bg = color_theme).pack(side = "left",pady = 15)
         
-        btn_lower_temp = Button(frame_2, text = "—",font = (font ,content_size_font),bg = color_button, fg = color_text_button, command = lambda: low_temp(status.temp_set_var) )
-        if status.is_WIN or status.is_LNX:
+        btn_lower_temp = Button(frame_2, text = "—",font = (font ,content_size_font),bg = color_button, fg = color_text_button, command = lambda: low_temp(temp_set_var) )
+        if sys_win or sys_linux:
             btn_lower_temp.config(activebackground = color_bg_activate_button, activeforeground = color_font_activate_button)
         btn_lower_temp.pack(side = "left", anchor = "nw", pady = 10)
 
         #separador
         Label(frame_2, text = " ", font = (font ,content_size_font), bg = color_theme).pack(side = "left",pady = 15)
 
-        lb_set_temp = Label(frame_2, textvar = status.temp_set_var, font = (font ,content_size_font))
+        lb_set_temp = Label(frame_2, textvar = temp_set_var, font = (font ,content_size_font))
         lb_set_temp.config(bg = "gray87")
         lb_set_temp.pack(side = "left", anchor = "nw", pady = 15)
 
         #separador
         Label(frame_2, text = " ", font = (font ,content_size_font), bg = color_theme).pack(side = "left",pady = 15)
 
-        btn_higher_temp = Button(frame_2, text = "+",font = (font ,content_size_font),bg = color_button, fg = color_text_button, command = lambda: high_temp(status.temp_set_var) )
-        if status.is_WIN or status.is_LNX:
+        btn_higher_temp = Button(frame_2, text = "+",font = (font ,content_size_font),bg = color_button, fg = color_text_button, command = lambda: high_temp(temp_set_var) )
+        if sys_win or sys_linux:
             btn_higher_temp.config(activebackground = color_bg_activate_button, activeforeground = color_font_activate_button)
 
         btn_higher_temp.pack(side = "left", anchor = "nw",pady= 10)
@@ -527,7 +589,7 @@ if __name__ == "__main__":
         ttk.Separator(frame_3, orient='horizontal').pack( fill='x') #linea separadora
 
         bt_select_file = Button(frame_3, text = " Seleccionar ",font = (font ,content_size_font),bg = color_button, fg = color_text_button, command = lambda: select_file(archivo_selected))
-        if status.is_WIN or status.is_LNX:
+        if sys_win or sys_linux:
             bt_select_file.config(activebackground = color_bg_activate_button, activeforeground = color_font_activate_button)
         bt_select_file.pack(side = "left", pady = 10)
 
@@ -551,7 +613,7 @@ if __name__ == "__main__":
         btn_start_print = Button(frame_4, text = "Imprimir", font = (font ,content_size_font),bg = color_button, 
                                 fg = color_text_button, state = DISABLED, command =  start_print)
         
-        if status.is_WIN or status.is_LNX:
+        if sys_win or sys_linux:
             btn_start_print.config(activebackground = color_bg_activate_button, activeforeground = color_font_activate_button)
         btn_start_print.pack(side = "left", pady = 10)
 
@@ -560,7 +622,7 @@ if __name__ == "__main__":
 
         btn_cancel = Button(frame_4, text = "Cancelar",font = (font ,content_size_font),bg = color_button, 
                             fg = color_text_button, state = DISABLED, command = cancel_window )
-        if status.is_WIN or status.is_LNX:
+        if sys_win or sys_linux:
             btn_cancel.config(activebackground = color_bg_activate_button, activeforeground = color_font_activate_button)
         btn_cancel.pack(side = "left", pady = 10)        
 
@@ -568,7 +630,7 @@ if __name__ == "__main__":
 
         btn_calibrate = Button(frame_4, text = "Calibrar",font = (font ,content_size_font),bg = color_button,
                                 fg = color_text_button, command = lambda: calibrate(root))
-        if status.is_WIN or status.is_LNX:
+        if sys_win or sys_linux:
             btn_calibrate.config(activebackground = color_bg_activate_button, activeforeground = color_font_activate_button)
         btn_calibrate.pack(side = "left", pady = 10)
         
