@@ -180,7 +180,7 @@ def thread_set(printer,temp_label_extruder):
                 printer.startprint(status.gcode)
                 printer.send_now("G90")
                 #status.is_printing = True
-                if  status.is_LNX or status.is_MAC:
+                if  status.is_LNX or status.is_WIN:
                     btn_cancel["state"] = ACTIVE
                 if status.is_MAC:
                     btn_cancel["state"]=NORMAL
@@ -241,7 +241,7 @@ def temp_callback(a):
     status.temp_state 
     status.temp_state = ""
     print('temp_callback', a)
-    temp_state = a[5:8]
+    status.temp_state = a[5:8]
     #print("Parse:" + temp_state)
 
 def high_temp():
@@ -256,18 +256,19 @@ def low_temp():
     
 
 def position_1():
-    printer.send_now("G28")
+    #printer.send_now("G28")
     printer.send_now(secuencia.cal_1_position)
 
 def position_2():
-    printer.send_now("G28")
+    #printer.send_now("G28")
     printer.send_now(secuencia.cal_2_position)
 
 def position_3():
-    printer.send_now("G28")
+    #printer.send_now("G28")
     printer.send_now(secuencia.cal_3_position)
 
 def cerrar(root,win):
+    printer.send_now("G28")
     root.deiconify()
     win.destroy()
 
@@ -282,13 +283,14 @@ def calibrate(root):
     win.protocol("WM_DELETE_WINDOW", lambda : cerrar(root,win)) #accion al cerrar la ventana 
     win.title('Calibracion')
     message = "Selecciona un boton para iniciar la calibracion "
+    printer.send_now("G28")
     Label(win, text=message).pack()
     frame = Frame(win,pady = 50, padx = 50)
 
     if status.is_MAC:
-        Button(frame, text="posición 1", command=position_1, font = (font ,content_size_font),bg = color_button, fg = color_text_button).grid(row = 1, column = 0)
-        Button(frame, text="posición 2", command=position_2, font = (font ,content_size_font),bg = color_button, fg = color_text_button).grid(row = 1, column = 2)
-        Button(frame, text="posición 3", command=position_3, font = (font ,content_size_font),bg = color_button, fg = color_text_button).grid(row = 0, column = 1)
+        Button(frame, text="posición 1", command=position_1, font = (font ,content_size_font),bg = color_button, fg = color_text_button).grid(row = 0, column = 0)
+        Button(frame, text="posición 2", command=position_2, font = (font ,content_size_font),bg = color_button, fg = color_text_button).grid(row = 0, column = 2)
+        Button(frame, text="posición 3", command=position_3, font = (font ,content_size_font),bg = color_button, fg = color_text_button).grid(row = 1, column = 1)
         sub_frame = Frame(win, ) 
         Label(sub_frame, text = "Para salir de la calibracion presione cerrar").pack()
         Button(sub_frame, text="cerrar", command= lambda : cerrar(root,win), font = (font ,content_size_font),bg = color_button, fg = color_text_button).pack()
