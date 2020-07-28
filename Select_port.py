@@ -95,6 +95,7 @@ def w_select_port():
 
     
     root = Tk()
+    root.title("Colibri 3D")
     if sys_mac or sys_win:
         root.iconbitmap("icon.ico")
     root.minsize(400, 150 )
@@ -117,9 +118,6 @@ def w_select_port():
     lst_box_puertos.pack()
 
     #interfaz grafica
-    root.title("Colibri 3D")
-    
-
     btn_connect = Button(text ="Conectar", command = lambda : connect(lst_box_puertos, root), )
     btn_connect.config(bg = color_button, fg = color_text_button ,font =(font,content_size_font))
     if sys_win or sys_linux:

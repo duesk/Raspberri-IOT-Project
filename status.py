@@ -20,8 +20,7 @@ class Status:
     is_LNX = False
     is_MAC = False
     archivo = ""
-
-
+    
     def process_name(self): 
         if self.ruta != "":
             self.archivo = ""
