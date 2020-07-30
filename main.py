@@ -18,6 +18,7 @@ import time
 
 from status import Status as Status
 from secuencias import Secuencias as Secuencias 
+from autoconect import autoconnect_port 
 
 
 status = Status()
@@ -54,7 +55,7 @@ def select_file(archivo_selected):
             btn_calibrate["state"] = ACTIVE
 
     else:
-        archivo_selected.set("Ningun archivo seleccionado")
+        archivo_selected.set("Ningún archivo seleccionado")
         lb_Select_file.pack()
         btn_start_print["state"] = DISABLED
         btn_cancel["state"] = DISABLED
@@ -368,8 +369,8 @@ if __name__ == "__main__":
     while True:
         if status.is_MAC:
                     #variables de estilo
-            title_size_font = 16
-            content_size_font = 12
+            title_size_font = 32
+            content_size_font = 24
             color_theme = "snow"
             color_button = "deepskyblue3"
             color_text_button = "gray99"
@@ -384,8 +385,16 @@ if __name__ == "__main__":
             font = "Garuda"
             color_font_activate_button = "gray25"
             color_bg_activate_button = "deepskyblue"
+        
+        
+        ##################################
+        ## Autoconect para Raspberri Pi ##
+        ##################################
 
-        puerto = run_select_port()
+        if status.is_LNX and status.is_RBpi:
+            puerto = autoconnect_port()
+        else:
+            puerto = run_select_port()
         is_conect = False
 
         if puerto is not None:
@@ -425,11 +434,18 @@ if __name__ == "__main__":
         ##################            interfaz             ######################
         #########################################################################
         root = Tk()
+
         if status.is_MAC or status.is_WIN:
             root.iconbitmap("icon.ico")
         root.title( "Colibri 3D")
-        root.minsize(500,310)
+        root.minsize(800,480)
+        #root.attributes('-type', 'dock')
+        #root.wm_attributes('-type', 'splash')
         #root.maxsize(500,700)
+
+        root.attributes('-alpha')
+        root.focus_force()
+
         root.resizable(0,0)
         root.config(bg = color_theme)
         root.protocol("WM_DELETE_WINDOW", lambda : close_window(root)) #accion al cerrar la ventana 
@@ -450,10 +466,10 @@ if __name__ == "__main__":
         status.temp_set_var.set(str(status.temp_set))
 
         archivo_selected = StringVar()
-        archivo_selected.set("Ningun archivo seleccionado")
+        archivo_selected.set("Ningún archivo seleccionado")
 
         status_label = StringVar()
-        status_label.set("impresora lista para imprimir")
+        status_label.set("Impresora lista para imprimir")
 
         #frame con padiing 15px
         frame = Frame(root)
@@ -493,7 +509,7 @@ if __name__ == "__main__":
 
         #Label(frame_2, text = "   /   ", font = (font ,content_size_font), bg = color_theme).pack(side = "left",pady = 15)
         
-        btn_lower_temp = Button(frame_2, text = "—",font = (font ,content_size_font),bg = color_button, fg = color_text_button, command = lambda: low_temp(status.temp_set_var) )
+        btn_lower_temp = Button(frame_2, text = "—",font = (font ,content_size_font+6),bg = color_button, fg = color_text_button, command = lambda: low_temp(status.temp_set_var) )
         if status.is_WIN or status.is_LNX:
             btn_lower_temp.config(activebackground = color_bg_activate_button, activeforeground = color_font_activate_button)
         btn_lower_temp.pack(side = "left", anchor = "nw", pady = 10)
@@ -508,7 +524,7 @@ if __name__ == "__main__":
         #separador
         Label(frame_2, text = " ", font = (font ,content_size_font), bg = color_theme).pack(side = "left",pady = 15)
 
-        btn_higher_temp = Button(frame_2, text = "+",font = (font ,content_size_font),bg = color_button, fg = color_text_button, command = lambda: high_temp(status.temp_set_var) )
+        btn_higher_temp = Button(frame_2, text = "+",font = (font ,content_size_font+6),bg = color_button, fg = color_text_button, command = lambda: high_temp(status.temp_set_var) )
         if status.is_WIN or status.is_LNX:
             btn_higher_temp.config(activebackground = color_bg_activate_button, activeforeground = color_font_activate_button)
 

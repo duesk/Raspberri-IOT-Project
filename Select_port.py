@@ -34,6 +34,7 @@ puerto = []
 send_port = None
 
 
+content_size_font = 12
 
 
 def from_rgb(rgb):

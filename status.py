@@ -19,6 +19,9 @@ class Status:
     is_WIN = False
     is_LNX = False
     is_MAC = False
+    is_RBpi= True
+    is_IOT = True
+    is_SuperPro = False
     archivo = ""
     
     def process_name(self): 
