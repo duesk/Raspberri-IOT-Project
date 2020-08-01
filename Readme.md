@@ -2,6 +2,19 @@
 
 
 
+eliminar window al isertar usb
+
+File Manager -> edit > preferences > volume management > Uncheck "Show available options for removable media when they are inserted "
+
+
+procedimiento de instalacion de raspberry pi os
+
+install PIL.imageTk
+
+
+sudo apt-get install python3-pil.imagetk
+
+
 ### Problemas para dar permisos linux
     
     

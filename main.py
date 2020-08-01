@@ -39,7 +39,7 @@ if sys.platform.startswith('linux') or sys.platform.startswith('cygwin'):
 #print("sistema MAC:" + str(status.is_MAC))
 
 def select_file(archivo_selected):
-
+    print("seleccionar archivo")
     status.ruta = Filedialog.askopenfilename(initialdir = "~/Escritorio", title = "Abrir archivo" , filetypes = (("Gcode", "*.gcode"),) )
     status.process_name()
 
@@ -443,7 +443,7 @@ if __name__ == "__main__":
         #root.wm_attributes('-type', 'splash')
         #root.maxsize(500,700)
 
-        root.attributes('-alpha')
+        root.attributes('-fullscreen')
         root.focus_force()
 
         root.resizable(0,0)
