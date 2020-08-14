@@ -2,16 +2,19 @@ from tkinter import *
 from tkinter import ttk
 from tkinter import filedialog as Filedialog
 from tkinter import messagebox as Messagebox
+
+import PIL
+from PIL import Image
+from PIL import ImageTk
+
 from Select_port import run_select_port
+from Select_file import run_select_file
 from printrun.printcore import printcore
 from printrun.gcoder import LightGCode as LightGCode 
 from windows_errors import kill_error as kill_error
 import asyncio
 import sys 
 
-import PIL
-from PIL import Image
-from PIL import ImageTk
 
 import threading
 import time
@@ -38,9 +41,12 @@ if sys.platform.startswith('linux') or sys.platform.startswith('cygwin'):
 #print("sistema WIN:" + str(status.is_WIN))
 #print("sistema MAC:" + str(status.is_MAC))
 
-def select_file(archivo_selected):
+def select_file(archivo_selected,root):
     print("seleccionar archivo")
-    status.ruta = Filedialog.askopenfilename(initialdir = "~/Escritorio", title = "Abrir archivo" , filetypes = (("Gcode", "*.gcode"),) )
+
+    selectWindow = Toplevel()
+    status.ruta =  run_select_file(selectWindow, root)
+
     status.process_name()
 
     if status.ruta != "":
@@ -159,6 +165,7 @@ def thread_set(printer,temp_label_extruder):
         printer.send_now("M105")
         time.sleep(3)
         temp_label_extruder.set("Actual:     %s°C     de     " %status.temp_state)
+        print(status.temp_state)
         lb_temp.pack()
         error = printer.errorcb
         list_error =list(error)
@@ -277,7 +284,7 @@ def cerrar(root,win):
 
 def calibrate(root):
     win = Toplevel()
-    if status.is_MAC or status.is_LNX:
+    if status.is_MAC or status.is_WIN:
         win.iconbitmap("icon.ico")
     #win.attributes("-type","notification")   #eliminar marco de sistema para cerrar
     #win.overrideredirect(True)
@@ -393,7 +400,7 @@ if __name__ == "__main__":
 
         if status.is_LNX and status.is_RBpi:
             puerto = autoconnect_port()
-        else:
+        else:                                                                                                                                                                                                                                                                                                                                                                                                              
             puerto = run_select_port()
         is_conect = False
 
@@ -440,6 +447,11 @@ if __name__ == "__main__":
         root.title( "Colibri 3D")
         root.minsize(800,480)
         #root.attributes('-type', 'dock')
+        root.attributes("-type","splash")
+        root.attributes("-zoomed", True)
+        
+
+        root.fullScreenState = True
         #root.wm_attributes('-type', 'splash')
         #root.maxsize(500,700)
 
@@ -509,7 +521,7 @@ if __name__ == "__main__":
 
         #Label(frame_2, text = "   /   ", font = (font ,content_size_font), bg = color_theme).pack(side = "left",pady = 15)
         
-        btn_lower_temp = Button(frame_2, text = "—",font = (font ,content_size_font+6),bg = color_button, fg = color_text_button, command = lambda: low_temp(status.temp_set_var) )
+        btn_lower_temp = Button(frame_2, text = "—",font = (font ,content_size_font+6),bg = color_button, fg = color_text_button, command = lambda: low_temp() )
         if status.is_WIN or status.is_LNX:
             btn_lower_temp.config(activebackground = color_bg_activate_button, activeforeground = color_font_activate_button)
         btn_lower_temp.pack(side = "left", anchor = "nw", pady = 10)
@@ -524,7 +536,7 @@ if __name__ == "__main__":
         #separador
         Label(frame_2, text = " ", font = (font ,content_size_font), bg = color_theme).pack(side = "left",pady = 15)
 
-        btn_higher_temp = Button(frame_2, text = "+",font = (font ,content_size_font+6),bg = color_button, fg = color_text_button, command = lambda: high_temp(status.temp_set_var) )
+        btn_higher_temp = Button(frame_2, text = "+",font = (font ,content_size_font+6),bg = color_button, fg = color_text_button, command = lambda: high_temp() )
         if status.is_WIN or status.is_LNX:
             btn_higher_temp.config(activebackground = color_bg_activate_button, activeforeground = color_font_activate_button)
 
@@ -544,7 +556,7 @@ if __name__ == "__main__":
 
         ttk.Separator(frame_3, orient='horizontal').pack( fill='x') #linea separadora
 
-        bt_select_file = Button(frame_3, text = " Seleccionar ",font = (font ,content_size_font),bg = color_button, fg = color_text_button, command = lambda: select_file(archivo_selected))
+        bt_select_file = Button(frame_3, text = " Seleccionar ",font = (font ,content_size_font),bg = color_button, fg = color_text_button, command = lambda: select_file(archivo_selected, root))
         if status.is_WIN or status.is_LNX:
             bt_select_file.config(activebackground = color_bg_activate_button, activeforeground = color_font_activate_button)
         bt_select_file.pack(side = "left", pady = 10)
@@ -589,6 +601,14 @@ if __name__ == "__main__":
         if status.is_WIN or status.is_LNX:
             btn_calibrate.config(activebackground = color_bg_activate_button, activeforeground = color_font_activate_button)
         btn_calibrate.pack(side = "left", pady = 10)
+        
+        if status.is_debug_mode:
+            btn_close = Button(frame_4, text = "Cerrar",font = (font ,content_size_font),bg = color_button,
+                                fg = color_text_button, command = root.destroy)
+            if status.is_WIN or status.is_LNX:
+                btn_close.config(activebackground = color_bg_activate_button, activeforeground = color_font_activate_button)
+            btn_close.pack(side = "left", pady = 10)
+        
         
 
         ########################################

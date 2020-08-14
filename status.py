@@ -23,6 +23,7 @@ class Status:
     is_IOT = True
     is_SuperPro = False
     archivo = ""
+    is_debug_mode = True
     
     def process_name(self): 
         if self.ruta != "":
