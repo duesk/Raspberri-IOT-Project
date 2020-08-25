@@ -110,7 +110,9 @@ def w_select_port():
     #print("Puerto :" + str(puerto))
 
     #preparacion de la listbox para seleccionar los puertos 
-    Label(text = "Selecciona el puerto donde esta conectada la impresora", bg = color_theme, font = (font, content_size_font)).pack(pady = 15, padx = 15)
+    Label(text = "Selecciona el puerto donde esta conectada la impresora", bg = color_theme, 
+                font = (font, content_size_font)).pack(pady = 15, padx = 15)
+                
     lst_box_puertos = Listbox(root)
     for i in puerto :
         print("puerto disponibles : " + i)

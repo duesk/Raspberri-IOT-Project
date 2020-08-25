@@ -22,7 +22,7 @@ import time
 from status import Status as Status
 from secuencias import Secuencias as Secuencias 
 from autoconect import autoconnect_port 
-
+from cancel_Window import CancelWindow
 
 status = Status()
 secuencia = Secuencias()
@@ -101,33 +101,15 @@ def start_print():
 def cancel_window():
 
     win = Toplevel()
-    win.title('Peligro')
-    if status.is_MAC or status.is_WIN:
-        win.iconbitmap("icon.ico")
-    message = "¿Seguro que deseas cancelar la impresion?"
-    Label(win, text=message).pack()
-    frame = Frame(win)
-    if status.is_MAC:
-        Button(frame, text="Si", command= lambda : cancel_print(win), font = (font ,content_size_font),bg = color_button, fg = color_text_button).pack(side = "left")
-        
-        Label(frame_4, text = "   ", font = (font ,content_size_font), bg = color_theme).pack(side = "left",pady = 15)
-        
-        Button(frame, text="No", command=win.destroy, font = (font ,content_size_font),bg = color_button, fg = color_text_button).pack(side = "left")
-    else:
-        Button(frame, text="Si", command= lambda : cancel_print(win),activebackground = color_bg_activate_button, activeforeground = color_font_activate_button, 
-                font = (font ,content_size_font),bg = color_button, fg = color_text_button).pack(side = "left")
+    response = CancelWindow(win)
+    if response:
+        cancel_print()
 
-        Label(frame_4, text = "   ", font = (font ,content_size_font), bg = color_theme).pack(side = "left",pady = 15)
 
-        Button(frame, text="No", command=win.destroy,activebackground = color_bg_activate_button, activeforeground = color_font_activate_button, 
-                font = (font ,content_size_font),bg = color_button, fg = color_text_button).pack(side = "left")
-    frame.pack()
-
-def cancel_print(win):
-
+def cancel_print():
+    
     status.is_pause
     status.response
-    win.destroy()
     status.is_printing = False
     printer.queueindex = 0
     printer.cancelprint()
@@ -296,19 +278,32 @@ def calibrate(root):
     frame = Frame(win,pady = 50, padx = 50)
 
     if status.is_MAC:
-        Button(frame, text="posición 1", command=position_1, font = (font ,content_size_font),bg = color_button, fg = color_text_button).grid(row = 0, column = 0)
-        Button(frame, text="posición 2", command=position_2, font = (font ,content_size_font),bg = color_button, fg = color_text_button).grid(row = 0, column = 2)
-        Button(frame, text="posición 3", command=position_3, font = (font ,content_size_font),bg = color_button, fg = color_text_button).grid(row = 1, column = 1)
+        Button(frame, text="posición 1", command=position_1, 
+                    font = (font ,content_size_font),bg = color_button, fg = color_text_button).grid(row = 0, column = 0)
+        
+        Button(frame, text="posición 2", command=position_2, 
+                    font = (font ,content_size_font),bg = color_button, fg = color_text_button).grid(row = 0, column = 2)
+        
+        Button(frame, text="posición 3", command=position_3, 
+                    font = (font ,content_size_font),bg = color_button, fg = color_text_button).grid(row = 1, column = 1)
+        
         sub_frame = Frame(win, ) 
         Label(sub_frame, text = "Para salir de la calibracion presione cerrar").pack()
-        Button(sub_frame, text="cerrar", command= lambda : cerrar(root,win), font = (font ,content_size_font),bg = color_button, fg = color_text_button).pack()
+        Button(sub_frame, text="cerrar", command= lambda : cerrar(root,win), 
+                    font = (font ,content_size_font),bg = color_button, fg = color_text_button).pack()
     else:
-        Button(frame, text="posición 1", command= position_1,activebackground = color_bg_activate_button, activeforeground = color_font_activate_button, 
+        Button(frame, text="posición 1", command= position_1,activebackground = color_bg_activate_button, 
+                    activeforeground = color_font_activate_button, 
                 font = (font ,content_size_font),bg = color_button, fg = color_text_button).grid(row = 1, column = 0 )
-        Button(frame, text="posición 2", command=position_2,activebackground = color_bg_activate_button, activeforeground = color_font_activate_button, 
+        
+        Button(frame, text="posición 2", command=position_2,activebackground = color_bg_activate_button, 
+                    activeforeground = color_font_activate_button, 
                 font = (font ,content_size_font),bg = color_button, fg = color_text_button).grid(row = 1, column = 2)
-        Button(frame, text="posición 3", command=position_3,activebackground = color_bg_activate_button, activeforeground = color_font_activate_button, 
+        
+        Button(frame, text="posición 3", command=position_3,activebackground = color_bg_activate_button, 
+                    activeforeground = color_font_activate_button, 
                 font = (font ,content_size_font),bg = color_button, fg = color_text_button).grid(row = 0, column = 1)
+        
         sub_frame = Frame(win, ) 
         Label(sub_frame, text = "Para salir de la calibracion presione cerrar").pack()
         Button(sub_frame, text="cerrar", command= lambda : cerrar(root,win),activebackground = color_bg_activate_button, activeforeground = color_font_activate_button, 
