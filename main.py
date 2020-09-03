@@ -266,6 +266,7 @@ def cerrar(root,win):
 
 def calibrate(root):
     win = Toplevel()
+    win.minsize(800, 480 )
     if status.is_MAC or status.is_WIN:
         win.iconbitmap("icon.ico")
     #win.attributes("-type","notification")   #eliminar marco de sistema para cerrar
@@ -337,11 +338,13 @@ def close_window(root):
         frame = Frame(win)
 
         if status.is_MAC:
-            Button(frame, text="Si", command= lambda : cancel_and_quit(win,root), font = (font ,content_size_font),bg = color_button, fg = color_text_button).pack(side = "left")
+            Button(frame, text="Si", command= lambda : cancel_and_quit(win,root), 
+                font = (font ,content_size_font),bg = color_button, fg = color_text_button).pack(side = "left")
             
             Label(frame_4, text = "   ", font = (font ,content_size_font), bg = color_theme).pack(side = "left",pady = 15)
             
-            Button(frame, text="No", command=win.destroy, font = (font ,content_size_font),bg = color_button, fg = color_text_button).pack(side = "left")
+            Button(frame, text="No", command=win.destroy, font = (font ,content_size_font),
+                    bg = color_button, fg = color_text_button).pack(side = "left")
         else:
             Button(frame, text="Si", command= lambda : cancel_and_quit(win,root),activebackground = color_bg_activate_button, activeforeground = color_font_activate_button, 
                     font = (font ,content_size_font),bg = color_button, fg = color_text_button).pack(side = "left")
