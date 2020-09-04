@@ -22,7 +22,7 @@ response = "hola"
 def kill_error(list_error,root):
     root1 = Tk()
     root1.title("Error")
-    root1.minsize (100,150)
+    root1.minsize (800, 480)
     root1.resizable(0,0)
     root1.config(bg =color_theme)
 

@@ -23,6 +23,7 @@ from status import Status as Status
 from secuencias import Secuencias as Secuencias 
 from autoconect import autoconnect_port 
 from cancel_Window import CancelWindow
+from calibrate import init_calibrate_window
 
 status = Status()
 secuencia = Secuencias()
@@ -243,76 +244,11 @@ def low_temp():
     status.temp_set -=1
     status.temp_set_var.set(str(status.temp_set))
     lb_set_temp.pack()
-    
-
-def position_1():
-    #printer.send_now("G28")
-    printer.send_now(secuencia.cal_1_position)
-
-def position_2():
-    #printer.send_now("G28")
-    printer.send_now(secuencia.cal_2_position)
-
-def position_3():
-    #printer.send_now("G28")
-    printer.send_now(secuencia.cal_3_position)
-
-def cerrar(root,win):
-    printer.send_now("G28")
-    root.deiconify()
-    win.destroy()
 
 
-
-def calibrate(root):
-    win = Toplevel()
-    win.minsize(800, 480 )
-    if status.is_MAC or status.is_WIN:
-        win.iconbitmap("icon.ico")
-    #win.attributes("-type","notification")   #eliminar marco de sistema para cerrar
-    #win.overrideredirect(True)
-    win.protocol("WM_DELETE_WINDOW", lambda : cerrar(root,win)) #accion al cerrar la ventana 
-    win.title('Calibracion')
-    message = "Selecciona un boton para iniciar la calibracion "
-    printer.send_now("G28")
-    Label(win, text=message).pack()
-    frame = Frame(win,pady = 50, padx = 50)
-
-    if status.is_MAC:
-        Button(frame, text="posición 1", command=position_1, 
-                    font = (font ,content_size_font),bg = color_button, fg = color_text_button).grid(row = 0, column = 0)
-        
-        Button(frame, text="posición 2", command=position_2, 
-                    font = (font ,content_size_font),bg = color_button, fg = color_text_button).grid(row = 0, column = 2)
-        
-        Button(frame, text="posición 3", command=position_3, 
-                    font = (font ,content_size_font),bg = color_button, fg = color_text_button).grid(row = 1, column = 1)
-        
-        sub_frame = Frame(win, ) 
-        Label(sub_frame, text = "Para salir de la calibracion presione cerrar").pack()
-        Button(sub_frame, text="cerrar", command= lambda : cerrar(root,win), 
-                    font = (font ,content_size_font),bg = color_button, fg = color_text_button).pack()
-    else:
-        Button(frame, text="posición 1", command= position_1,activebackground = color_bg_activate_button, 
-                    activeforeground = color_font_activate_button, 
-                font = (font ,content_size_font),bg = color_button, fg = color_text_button).grid(row = 1, column = 0 )
-        
-        Button(frame, text="posición 2", command=position_2,activebackground = color_bg_activate_button, 
-                    activeforeground = color_font_activate_button, 
-                font = (font ,content_size_font),bg = color_button, fg = color_text_button).grid(row = 1, column = 2)
-        
-        Button(frame, text="posición 3", command=position_3,activebackground = color_bg_activate_button, 
-                    activeforeground = color_font_activate_button, 
-                font = (font ,content_size_font),bg = color_button, fg = color_text_button).grid(row = 0, column = 1)
-        
-        sub_frame = Frame(win, ) 
-        Label(sub_frame, text = "Para salir de la calibracion presione cerrar").pack()
-        Button(sub_frame, text="cerrar", command= lambda : cerrar(root,win),activebackground = color_bg_activate_button, activeforeground = color_font_activate_button, 
-                font = (font ,content_size_font),bg = color_button, fg = color_text_button).pack()
-    frame.pack()
-    sub_frame.pack( )
-    status_label.set("Status: Calibrando ")
-    root.withdraw()
+def calibrate(root,printer):
+    win_calibrate = Toplevel()
+    init_calibrate_window(root, win_calibrate, printer)
     
 
 def close_all(root):
@@ -327,7 +263,8 @@ def cancel_and_quit(win,root):
     root.destroy()
 
 def close_window(root):
-
+    pass
+    """
     if status.is_printing or status.st_print:
         win = Toplevel()
         if status.is_MAC or status.is_WIN:
@@ -357,7 +294,7 @@ def close_window(root):
         frame.pack()
     else:
         root.destroy()
-
+    """
 
 
 
@@ -595,7 +532,7 @@ if __name__ == "__main__":
         Label(frame_4, text = "   ", font = (font ,content_size_font), bg = color_theme).pack(side = "left",pady = 15)
 
         btn_calibrate = Button(frame_4, text = "Calibrar",font = (font ,content_size_font),bg = color_button,
-                                fg = color_text_button, command = lambda: calibrate(root))
+                                fg = color_text_button, command = lambda: calibrate(root, printer))
         if status.is_WIN or status.is_LNX:
             btn_calibrate.config(activebackground = color_bg_activate_button, activeforeground = color_font_activate_button)
         btn_calibrate.pack(side = "left", pady = 10)
