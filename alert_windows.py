@@ -23,6 +23,13 @@ def ask_delete(ask_window,select_window,file_name):
 
     #ask_window.title("Colibrgyti 3D")
 
+    ask_window.attributes("-type","splash")
+    ask_window.attributes("-zoomed", True)
+    ask_window.fullScreenState = True
+    ask_window.attributes('-fullscreen')
+    ask_window.focus_force()
+    ask_window.resizable(0,0)
+
     ask_window.minsize(800, 480 )
     #ask_window.attributes("-type","splash")
     #ask_window.attributes("-zoomed", True)

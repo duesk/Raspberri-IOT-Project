@@ -23,7 +23,14 @@ def kill_error(list_error,root):
     root1 = Tk()
     root1.title("Error")
     root1.minsize (800, 480)
+
+    root1.attributes("-type","splash")
+    root1.attributes("-zoomed", True)
+    root1.fullScreenState = True
+    root1.attributes('-fullscreen')
+    root1.focus_force()
     root1.resizable(0,0)
+        
     root1.config(bg =color_theme)
 
     frame = Frame(root1, pady = 15,padx = 15,bg = color_theme )

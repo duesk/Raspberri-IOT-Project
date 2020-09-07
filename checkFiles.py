@@ -8,7 +8,9 @@ def check_usb_files():
     #print("ruta de home")
     #print(home)
     gcodes = [] 
-    file_list = os.listdir(home+"/usb")
+    #file_list = os.listdir(home+"/usb")
+    rute = os.listdir("/media/pi")
+    file_list = os.listdir("/media/pi/"+rute[0])
     for file in file_list:
         if file.endswith(".gcode"):
             gcodes.append(file)

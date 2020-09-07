@@ -382,18 +382,18 @@ if __name__ == "__main__":
         root.title( "Colibri 3D")
         root.minsize(800,480)
         #root.attributes('-type', 'dock')
+        
         root.attributes("-type","splash")
         root.attributes("-zoomed", True)
-        
-
         root.fullScreenState = True
+        root.attributes('-fullscreen')
+        root.focus_force()
+        root.resizable(0,0)
+
         #root.wm_attributes('-type', 'splash')
         #root.maxsize(500,700)
 
-        root.attributes('-fullscreen')
-        root.focus_force()
 
-        root.resizable(0,0)
         root.config(bg = color_theme)
         root.protocol("WM_DELETE_WINDOW", lambda : close_window(root)) #accion al cerrar la ventana 
 

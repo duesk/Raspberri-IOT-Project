@@ -73,16 +73,25 @@ def move_file(lst_box_archivos, select_window,btn_sd, btn_USB):
 
         #mover de usb a sd
         if usb_selected:
-            copy = "/home/rafael/usb/"+ select
-            paste  = "/home/rafael/gcodes/"+ select
+            rute = os.listdir("/media/pi")
+            copy_ruta = "/media/pi/" + rute[0] + "/"
+            copy = copy_ruta + select
+            #paste  = "/home/rafael/gcodes/"+ select
+            paste  = "/home/pi/gcodes/"+ select
+
             shutil.copyfile(copy,paste)
             print("copiado")
             sd_list(lst_box_archivos,btn_sd, btn_USB)
             
         #mover de sd a usb
         else:
-            copy = "/home/rafael/gcodes/"+ select
+            copy = "/home/pi/gcodes/"+ select
+            
+            rute = os.listdir("/media/pi")
+            paste_ruta = "/media/pi/" + rute[0] + "/"
+            copy = paste_ruta + select
             paste  = "/home/rafael/usb/"+ select
+
             shutil.copyfile(copy, paste)
             print("copiado")
             usb_list(lst_box_archivos,btn_sd, btn_USB)
@@ -104,13 +113,21 @@ def remove_file(lst_box_archivos, select_window,btn_sd, btn_USB):
     #borrar archivo de sd
     if result:
         if sd_selected:
-            delete_file = "/home/rafael/gcodes/" + file_name
+            #delete_file = "/home/rafael/gcodes/" + file_name
+            delete_file = "/home/pi/gcodes/" + file_name
             print("Borrado")
             remove(delete_file)
             sd_list(lst_box_archivos,btn_sd, btn_USB)
         #borrar archivo de usb
         else:
-            delete_file = "/home/rafael/usb/" + file_name
+            #delete_file = "/home/rafael/usb/" + file_name
+            #file_list = os.listdir("/media/pi/"+rute[0])
+
+            rute = os.listdir("/media/pi")
+            delete_ruta = "/media/pi/" + rute[0] + "/"
+
+            delete_file = delete_ruta + file_name
+
             print("Borrado")
             remove(delete_file)
             usb_list(lst_box_archivos,btn_sd, btn_USB)
@@ -141,6 +158,14 @@ def run_select_file(select_window, root):
     #select_window.title("Colibrgyti 3D")
 
     select_window.minsize(800, 480 )
+    select_window.attributes("-type","splash")
+    select_window.attributes("-zoomed", True)
+    select_window.fullScreenState = True
+    select_window.attributes('-fullscreen')
+    select_window.focus_force()
+    select_window.resizable(0,0)
+
+    
     #select_window.attributes("-type","splash")
     #select_window.attributes("-zoomed", True)
     select_window.config(bg = color_theme)
@@ -227,7 +252,13 @@ def run_select_file(select_window, root):
     """
 
     root.wait_window(select_window)
-    send_file = "/home/rafael/gcodes/"+send_file
+    #send_file = "/home/rafael/gcodes/"+send_file
+    if sd sd_selected:
+        send_file = "/home/pi/gcodes/"+send_file
+    else:
+        rute = os.listdir("/media/pi")
+        ruta = "/media/pi/" + rute[0] + "/"
+        send_file = ruta + send_file  
     print("Archivo enviado: "+send_file)
     return send_file
 
