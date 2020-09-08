@@ -1,6 +1,7 @@
 from tkinter import *
 import asyncio
 import shutil
+import os 
 
 from os import remove
 
@@ -253,7 +254,7 @@ def run_select_file(select_window, root):
 
     root.wait_window(select_window)
     #send_file = "/home/rafael/gcodes/"+send_file
-    if sd sd_selected:
+    if sd_selected:
         send_file = "/home/pi/gcodes/"+send_file
     else:
         rute = os.listdir("/media/pi")

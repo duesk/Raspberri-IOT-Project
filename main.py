@@ -52,7 +52,8 @@ def select_file(archivo_selected,root):
 
     if status.ruta != "":
     
-        archivo_selected.set("Seleccionado: "+ status.archivo)
+        archivo_selected.set("Seleccionado: "+ status.ruta)
+        #archivo_selected.set("Seleccionado: "+ status.archivo)        
         lb_Select_file.pack()
         if status.is_MAC:
             btn_start_print["state"] = NORMAL
@@ -99,10 +100,10 @@ def start_print():
             bt_select_file["state"]=DISABLED
 
 
-def cancel_window():
+def cancel_window(root):
 
     win = Toplevel()
-    response = CancelWindow(win)
+    response = CancelWindow(win,root)
     if response:
         cancel_print()
 
@@ -524,7 +525,7 @@ if __name__ == "__main__":
 
 
         btn_cancel = Button(frame_4, text = "Cancelar",font = (font ,content_size_font),bg = color_button, 
-                            fg = color_text_button, state = DISABLED, command = cancel_window )
+                            fg = color_text_button, state = DISABLED, command =lambda: cancel_window(root))
         if status.is_WIN or status.is_LNX:
             btn_cancel.config(activebackground = color_bg_activate_button, activeforeground = color_font_activate_button)
         btn_cancel.pack(side = "left", pady = 10)        

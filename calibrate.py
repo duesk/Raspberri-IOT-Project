@@ -39,6 +39,12 @@ def init_calibrate_window(root, win_calibrate, printer):
     win_calibrate.config(bg = color_theme)
 
     win_calibrate.minsize(800, 480 )
+    win_calibrate.attributes("-type","splash")
+    win_calibrate.attributes("-zoomed", True)
+    win_calibrate.fullScreenState = True
+    win_calibrate.attributes('-fullscreen')
+    win_calibrate.focus_force()
+    win_calibrate.resizable(0,0)
 
     win_calibrate.protocol("WM_DELETE_WINDOW", lambda : cerrar(root,win_calibrate)) #accion al cerrar la ventana 
     win_calibrate.title('Calibracion')
